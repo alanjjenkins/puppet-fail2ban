@@ -19,11 +19,19 @@ class fail2ban (
   $usedns           = 'warn',
   $persistent_bans  = false,
 ) {
-
   validate_array($ignoreip)
+  $valid_backends = [
+      'auto',
+      'pyinotify',
+      'gamin',
+      'polling',
+      'systemd'
+  ]
+  $valid_backend_message = join($valid_backends, ', ')
+
   validate_re(
-    $backend, ['auto', 'pyinotify', 'gamin', 'polling'],
-    'backend must be one of auto, pyinotify, gamin or polling.'
+    $backend, $valid_backends,
+    "backend must be one of ${valid_backend_message}."
   )
   validate_re(
     $protocol, ['tcp', 'udp', 'icmp', 'all'],
@@ -36,10 +44,9 @@ class fail2ban (
   )
   validate_bool($persistent_bans)
 
-  anchor { 'fail2ban::begin': } ->
-  class { 'fail2ban::install': } ->
-  class { 'fail2ban::config': } ~>
-  class { 'fail2ban::service': } ->
-  anchor { 'fail2ban::end': }
-
+  anchor { 'fail2ban::begin': }
+  -> class { 'fail2ban::install': }
+  -> class { 'fail2ban::config': }
+  ~> class { 'fail2ban::service': }
+  -> anchor { 'fail2ban::end': }
 }

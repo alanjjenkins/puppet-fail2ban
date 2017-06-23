@@ -3,7 +3,7 @@
 define fail2ban::jail (
   $port,
   $filter,
-  $logpath,
+  $logpath   = false,
   $ensure    = present,
   $enabled   = true,
   $protocol  = false,
